@@ -2,22 +2,21 @@ local ffi = require 'ffi'
 local sdl = require 'ffi.req' 'sdl'
 local class = require 'ext.class'
 
-local function sdlAssert(result)
-	if result then return end
-	local msg = ffi.string(sdl.SDL_GetError())
-	error('SDL_GetError(): '..msg)
-end
+local sdlAssertZero = require 'sdlapp.assert'.zero
+local sdlAssertNonNull = require 'sdlapp.assert'.nonnull
 
-local function sdlAssertZero(intResult)
-	sdlAssert(intResult == 0)
-	return intResult
-end
-
-local function sdlAssertNonNull(ptrResult)
-	sdlAssert(ptrResult ~= nil)
-	return ptrResult
-end
-
+--[[
+parameters to override prior to init:
+	width, height = initial window size
+	title = initial window title
+	sdlInitFlags = flags for SDL_Init
+	sdlCreateWindowFlags = flags for SDL_CreateWindow
+	initWindow() = called after SDL window init
+	update() = called once per frame
+	resize() = called upon resize, self.width and self.height hold the current size
+	event(eventPtr) = called per SDL event
+	exit() = called upon shutdown
+--]]
 local SDLApp = class()
 
 function SDLApp:init()
@@ -46,7 +45,7 @@ SDLApp.sdlCreateWindowFlags = bit.bor(
 
 function SDLApp:run()
 	sdlAssertZero(sdl.SDL_Init(self.sdlInitFlags))
-	
+
 	xpcall(function()
 		local eventPtr = ffi.new('SDL_Event[1]')
 
@@ -61,6 +60,8 @@ function SDLApp:run()
 				elseif eventPtr[0].type == sdl.SDL_VIDEORESIZE then
 					self.width = eventPtr[0].resize.w
 					self.height = eventPtr[0].resize.h
+					self.aspectRatio = self.width / self.height
+					self:resize()
 --]]
 -- [[ window
 				elseif eventPtr[0].type == sdl.SDL_WINDOWEVENT then
@@ -68,7 +69,7 @@ function SDLApp:run()
 						self.width = eventPtr[0].window.data1
 						self.height = eventPtr[0].window.data2
 						self.aspectRatio = self.width / self.height
-						self:onResize()
+						self:resize()
 					end
 --]]
 				elseif eventPtr[0].type == sdl.SDL_KEYDOWN then
@@ -86,14 +87,14 @@ function SDLApp:run()
 				end
 			end
 
-			if self.update then self:update() end
+			if self.onUpdate then self:onUpdate() end
 		until self.done
 	end, function(err)
 		print(err)
 		print(debug.traceback())
 	end)
 
-	if self.exit then self:exit() end
+	if self.onExit then self:onExit() end
 
 	sdl.SDL_DestroyWindow(self.window);
 	sdl.SDL_Quit()
@@ -115,7 +116,7 @@ function SDLApp:initWindow()
 --]]
 end
 
-function SDLApp:onResize()
+function SDLApp:resize()
 end
 
 return SDLApp
