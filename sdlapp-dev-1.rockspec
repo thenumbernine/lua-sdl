@@ -16,6 +16,6 @@ build = {
 	modules = {
 		["sdlapp.assert"] = "assert.lua",
 		sdlapp = "sdlapp.lua",
-		["sdlapp.test.test"] = "test/test.lua"
+		["sdlapp.tests.test"] = "tests/test.lua"
 	}
 }
