@@ -87,6 +87,11 @@ function SDLApp:run()
 			end
 
 			self:update()
+			
+			-- separate update call here to ensure it runs last
+			-- yeah this is just for GLApp or anyone else who needs to call some form of swap/flush
+			self:postUpdate()
+		
 		until self.done
 	end, function(err)
 		print(err)
@@ -119,6 +124,9 @@ function SDLApp:event(e)
 end
 
 function SDLApp:update()
+end
+
+function SDLApp:postUpdate()
 end
 
 function SDLApp:exit()
