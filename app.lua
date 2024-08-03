@@ -1,9 +1,9 @@
 local ffi = require 'ffi'
-local sdl = require 'ffi.req' 'sdl'
+local sdl = require 'sdl'
 local class = require 'ext.class'
 
-local sdlAssertZero = require 'sdlapp.assert'.zero
-local sdlAssertNonNull = require 'sdlapp.assert'.nonnull
+local sdlAssertZero = require 'sdl.assert'.zero
+local sdlAssertNonNull = require 'sdl.assert'.nonnull
 
 --[[
 parameters to override prior to init:

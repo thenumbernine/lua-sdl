@@ -1,7 +1,7 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
-local sdl = require 'ffi.req' 'sdl'
-local SDLApp = require 'sdlapp'
+local sdl = require 'sdl'
+local SDLApp = require 'sdl.app'
 local App = SDLApp:subclass()
 App.title = 'test'
 
