@@ -50,7 +50,6 @@ function SDLApp:run()
 		local eventPtr = ffi.new('SDL_Event[1]')
 
 		self:initWindow()
-		sdl.SDL_SetWindowSize(self.window, self.width, self.height)
 
 		repeat
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
@@ -82,22 +81,19 @@ function SDLApp:run()
 						break
 					end
 				end
-				if self.onEvent then
-					self:onEvent(eventPtr)
+				if self.event then
+					self:event(eventPtr)
 				end
 			end
 
-			if self.onUpdate then self:onUpdate() end
+			self:update()
 		until self.done
 	end, function(err)
 		print(err)
 		print(debug.traceback())
 	end)
 
-	if self.onExit then self:onExit() end
-
-	sdl.SDL_DestroyWindow(self.window);
-	sdl.SDL_Quit()
+	self:exit()
 end
 
 function SDLApp:initWindow()
@@ -117,6 +113,18 @@ function SDLApp:initWindow()
 end
 
 function SDLApp:resize()
+end
+
+function SDLApp:event(e)
+end
+
+function SDLApp:update()
+end
+
+function SDLApp:exit()
+	-- TODO use gcwrapper?  or would that ensure order of dtor?
+	sdl.SDL_DestroyWindow(self.window);
+	sdl.SDL_Quit()
 end
 
 return SDLApp
