@@ -50,6 +50,7 @@ function SDLApp:run()
 		local eventPtr = ffi.new('SDL_Event[1]')
 
 		self:initWindow()
+		self:resize()
 
 		repeat
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
