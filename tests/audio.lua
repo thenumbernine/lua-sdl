@@ -1,6 +1,7 @@
 #!/usr/bin/env luajit
 local ffi = require 'ffi'
 local table = require 'ext.table'
+local getTime = require 'ext.timer'.getTime
 local asserteq = require 'ext.assert'.eq
 local assertindex = require 'ext.assert'.index
 local sdl = require 'sdl'
@@ -8,34 +9,33 @@ local sdlAssertZero = require 'sdl.assert'.zero
 local SDLApp = require 'sdl.app'
 local App = SDLApp:subclass()
 
-local ctypeForSDLAudioFormat =  {
-	-- TODO 'LSB' vs 'MSB' ...
-	-- TODO how to determine unique types for each of these ...
-	[sdl.AUDIO_U8] = 'uint8_t',
-	[sdl.AUDIO_S8] = 'int8_t',
-	[sdl.AUDIO_S16] = 'int16_t',
-	[sdl.AUDIO_U16] = 'uint16_t',
-	[sdl.AUDIO_S32] = 'int32_t',
-	[sdl.AUDIO_F32] = 'float',
+local fn = ...
 
-	[sdl.AUDIO_S16SYS] = 'int16_t',
-	[sdl.AUDIO_U16SYS] = 'uint16_t',
-	[sdl.AUDIO_S32SYS] = 'int32_t',
-	[sdl.AUDIO_F32SYS] = 'float',
-}
-local sdlAudioFormatForCType = table.map(ctypeForSDLAudioFormat, function(v,k) return k,v end):setmetatable(nil)
+local ctypeForSDLAudioFormat = require 'sdl.audio'.ctypeForSDLAudioFormat
+local sdlAudioFormatForCType = require 'sdl.audio'.sdlAudioFormatForCType
 
 local function printSpecs(spec)
-	print('', 'freq', spec.freq)
-	print('', 'format', spec.format, ctypeForSDLAudioFormat[spec.format])
-	print('', 'channels', spec.channels)
-	print('', 'silence', spec.silence)
-	print('', 'samples', spec.samples)
-	print('', 'padding', spec.padding)
-	print('', 'size', spec.size)
-	print('', 'callback', spec.callback)
-	print('', 'userdata', spec.userdata)
+	local ctype = ctypeForSDLAudioFormat[spec.format]
+	local sizeofctype = ctype and ffi.sizeof(ctype) or 0
+	print('\tfreq = '..tostring(spec.freq))
+	print('\tformat = '..tostring(spec.format)..'.. ctype='..tostring(ctype))
+	print('\t sizeof ctype = '..tostring(sizeofctype))
+	print('\tchannels = '..tostring(spec.channels))
+	print('\tsilence = '..tostring(spec.silence))
+	print('\tsamples = '..tostring(spec.samples))
+	print('\tpadding = '..tostring(spec.padding))
+	print('\tsize = '..tostring(spec.size))
+	print('\t size in seconds = '..tostring(
+		tonumber(spec.size) / tonumber(spec.freq * spec.channels * sizeofctype)
+	))
+	print('\tcallback = '..tostring(spec.callback))
+	print('\tuserdata = '..tostring(spec.userdata))
 end
+
+local function fillBuffer(userdata, stream, len)
+	print'fillBuffer'
+end
+local fillBufferCallback = ffi.cast('SDL_AudioCallback', fillBuffer)
 
 function App:initWindow()
 	App.super.initWindow(self)
@@ -61,23 +61,36 @@ function App:initWindow()
 		print(i, ithName)
 		local spec = ffi.new'SDL_AudioSpec[1]'
 		sdlAssertZero(sdl.SDL_GetAudioDeviceSpec(i, isCapture, spec))
-		printSpecs(spec[0])
+		--printSpecs(spec[0])	-- this just has channels filled out
 	end
 
 	local desired = ffi.new'SDL_AudioSpec[1]'
-	self.sampleFrameRate = 32000
-	local bufferSizeInSeconds = 1
-	self.channelCount = 2
-	self.bufferSizeInSampleFrames = bufferSizeInSeconds * self.sampleFrameRate
-	local bufferSizeInSamples = self.bufferSizeInSampleFrames * self.channelCount
-	self.sampleType = 'int16_t'
-	self.bufferSizeInBytes = bufferSizeInSamples * ffi.sizeof(self.sampleType)
-	ffi.fill(desired, ffi.sizeof'SDL_AudioSpec')
-	desired[0].freq = self.sampleFrameRate
-	desired[0].format = sdlAudioFormatForCType[self.sampleType]
-	desired[0].channels = self.channelCount
-	desired[0].samples = self.bufferSizeInSampleFrames -- in "sample frames" ... where stereo means two samples per "sample frame"
-	desired[0].size = self.bufferSizeInBytes		-- is calculated, but I wanted to make sure my calculations matched.
+	if fn then
+		self.wav = require 'audio.io.wav'():load(fn)
+		desired[0].freq = self.wav.freq
+		desired[0].format = sdlAudioFormatForCType[self.wav.ctype]
+		desired[0].channels = self.wav.channels
+		desired[0].samples = self.wav.size / (self.wav.channels * ffi.sizeof(self.wav.ctype))
+		desired[0].size = self.wav.size
+	else
+		self.sampleFrameRate = 32000
+		local bufferSizeInSeconds = .075		-- 9600 bytes	= doesn't divide evenly, so make sure to regenerate waveforms based on correct 't' for the new buffers
+		--local bufferSizeInSeconds = .05		-- 6400 bytes = 3200 sample-frames = 1600 samples
+		--local bufferSizeInSeconds = .025	-- 3200 bytes isn't enough to stream? docs say to use 1k-8k ... but 3k isn't working ...
+		self.channelCount = 2
+		self.bufferSizeInSampleFrames = bufferSizeInSeconds * self.sampleFrameRate
+		local bufferSizeInSamples = self.bufferSizeInSampleFrames * self.channelCount
+		self.sampleType = 'int16_t'
+		self.bufferSizeInBytes = bufferSizeInSamples * ffi.sizeof(self.sampleType)
+		ffi.fill(desired, ffi.sizeof'SDL_AudioSpec')
+		desired[0].freq = self.sampleFrameRate
+		desired[0].format = sdlAudioFormatForCType[self.sampleType]
+		desired[0].channels = self.channelCount
+		desired[0].samples = self.bufferSizeInSampleFrames -- in "sample frames" ... where stereo means two samples per "sample frame"
+		desired[0].size = self.bufferSizeInBytes		-- is calculated, but I wanted to make sure my calculations matched.
+	end
+	-- "SDL_GetError(): Audio device has a callback, queueing not allowed"
+	--desired[0].callback = fillBufferCallback
 	print'desired specs:'
 	printSpecs(desired[0])
 	self.audioSpec = ffi.new'SDL_AudioSpec[1]'
@@ -106,9 +119,16 @@ function App:initWindow()
 	self.sampleType = assertindex(ctypeForSDLAudioFormat, self.audioSpec[0].format)
 	bufferSizeInSamples = self.bufferSizeInBytes / ffi.sizeof(self.sampleType)
 	self.bufferSizeInSampleFrames = bufferSizeInSamples / self.channelCount
-	bufferSizeInSeconds = self.bufferSizeInSampleFrames / self.sampleFrameRate
+	self.bufferSizeInSeconds = self.bufferSizeInSampleFrames / self.sampleFrameRate
 	self.audioBufferLength = math.ceil(self.bufferSizeInBytes / ffi.sizeof(self.sampleType))
-	self.audioBuffer = ffi.new(self.sampleType..'[?]', self.audioBufferLength)
+	self.sampleIndex = 0
+	if not fn then
+		self.audioBuffer = ffi.new(self.sampleType..'[?]', self.audioBufferLength)
+		self:fillAudioBuffer()
+	else
+		self.audioBuffer = self.wav.data
+	end
+	self.lastPlayTime = getTime()
 	self:updateAudio()
 	print'starting audio...'
 	sdl.SDL_PauseAudioDevice(self.audioDeviceID, 0)	-- pause 0 <=> play
@@ -117,12 +137,13 @@ end
 function App:fillAudioBuffer()
 	local p = self.audioBuffer
 	for i=0,self.bufferSizeInSampleFrames-1 do
-		local t = i / self.sampleFrameRate
+		local t = self.sampleIndex / self.sampleFrameRate
 		local ampl = 32767 * math.sin(220 * t * (2 * math.pi))
 		for j=0,self.channelCount-1 do
 			p[0] = ampl
 			p = p + 1
 		end
+		self.sampleIndex = self.sampleIndex + 1
 	end
 	asserteq(
 		ffi.cast('char*', p),
@@ -131,11 +152,28 @@ function App:fillAudioBuffer()
 end
 
 function App:updateAudio()
+	--[[ refill based on queued bytes ... this function seems to go 0 to 100% and nothing between ...
+	-- I get a skip at first when playing back, but then it smooths out
 	local queuedInBytes = sdl.SDL_GetQueuedAudioSize(self.audioDeviceID)
 	if queuedInBytes < .1 * self.bufferSizeInBytes then
-		print('refilling queue')
+	--]]
+	-- [[ refill based on tracking time ourselves and hoping it's not out of sync with SDL audio's time such that long-term we get an overflow/underflow
+	-- seems to work perfectly.
+	-- don't forget to update the queue before the audio is empty
+	local thisTime = getTime()
+	if thisTime - self.lastPlayTime > self.bufferSizeInSeconds then
+		if math.floor(thisTime) ~= math.floor(self.lastPlayTime) then
+			-- ok I really dont' trust the GetQueueAudioSize as an indicator at all now, because when I track time myself, I hear no underflow, and the queue is always reporting zero.
+			-- so I think I shouldn't use the queue to detect when to refill the queue, instead I need to track playback time myself ...
+			print('queued', sdl.SDL_GetQueuedAudioSize(self.audioDeviceID))
+		end
+		self.lastPlayTime = thisTime
+	--]]
+--print('refilling queue')
+		if not self.wav then
+			self:fillAudioBuffer()
+		end
 		-- push audio here
-		self:fillAudioBuffer()
 		sdlAssertZero(sdl.SDL_QueueAudio(
 			self.audioDeviceID,
 			self.audioBuffer,
