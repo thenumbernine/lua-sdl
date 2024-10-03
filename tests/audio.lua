@@ -7,7 +7,9 @@ local assertindex = require 'ext.assert'.index
 local sdl = require 'sdl'
 local sdlAssertZero = require 'sdl.assert'.zero
 local SDLApp = require 'sdl.app'
+
 local App = SDLApp:subclass()
+App.sdlInitFlags = bit.bor(App.sdlInitFlags, sdl.SDL_INIT_AUDIO)
 
 local fn = ...
 
@@ -47,8 +49,6 @@ function App:initWindow()
 	for i=0,numDrivers-1 do
 		print(i, ffi.string(sdl.SDL_GetAudioDriver(i)))
 	end
-
-	sdlAssertZero(sdl.SDL_AudioInit'coreaudio')
 
 	local isCapture = 0
 	local numDevices = sdl.SDL_GetNumAudioDevices(isCapture)
