@@ -144,7 +144,7 @@ function App:fillAudioBuffer()
 		end
 		self.sampleIndex = self.sampleIndex + 1
 	end
-	asserteq(
+	assert.eq(
 		ffi.cast('char*', p),
 		ffi.cast('char*', self.audioBuffer) + self.bufferSizeInBytes
 	)
