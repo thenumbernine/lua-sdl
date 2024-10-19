@@ -2,8 +2,7 @@
 local ffi = require 'ffi'
 local table = require 'ext.table'
 local getTime = require 'ext.timer'.getTime
-local asserteq = require 'ext.assert'.eq
-local assertindex = require 'ext.assert'.index
+local assert = require 'ext.assert'
 local sdl = require 'sdl'
 local sdlAssertZero = require 'sdl.assert'.zero
 local SDLApp = require 'sdl.app'
@@ -116,7 +115,7 @@ function App:initWindow()
 	self.bufferSizeInBytes = self.audioSpec[0].size
 	self.sampleFrameRate = self.audioSpec[0].freq
 	self.channelCount = self.audioSpec[0].channels
-	self.sampleType = assertindex(ctypeForSDLAudioFormat, self.audioSpec[0].format)
+	self.sampleType = assert.index(ctypeForSDLAudioFormat, self.audioSpec[0].format)
 	bufferSizeInSamples = self.bufferSizeInBytes / ffi.sizeof(self.sampleType)
 	self.bufferSizeInSampleFrames = bufferSizeInSamples / self.channelCount
 	self.bufferSizeInSeconds = self.bufferSizeInSampleFrames / self.sampleFrameRate
