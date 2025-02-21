@@ -47,13 +47,29 @@ function SDLApp:run()
 	sdlAssertZero(sdl.SDL_Init(self.sdlInitFlags))
 
 	xpcall(function()
+		--[[ example A:
 		local eventPtr = ffi.new('SDL_Event[1]')
+		--]]
+		-- [[ example B:
+		local vector = require 'ffi.cpp.vector'
+		local eventBuffer = vector'SDL_Event'()
+		eventBuffer:resize(256)
+		--]]
 
 		self:initWindow()
 		self:resize()
 
 		repeat
+			--[[ example A:
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
+			--]]
+			-- [[ example B: is supposed to incur less overhead
+			sdl.SDL_PumpEvents()
+			local numEvents = sdl.SDL_PeepEvents(eventBuffer.v, #eventBuffer, sdl.SDL_GETEVENT, sdl.SDL_FIRSTEVENT, sdl.SDL_LASTEVENT)
+			for i=0,numEvents-1 do
+				local eventPtr = eventBuffer.v + i
+			--]]
+
 				if eventPtr[0].type == sdl.SDL_QUIT then
 					self:requestExit()
 --[[ screen
@@ -88,11 +104,11 @@ function SDLApp:run()
 			end
 
 			self:update()
-			
+
 			-- separate update call here to ensure it runs last
 			-- yeah this is just for GLApp or anyone else who needs to call some form of swap/flush
 			self:postUpdate()
-		
+
 		until self.done
 	end, function(err)
 		print(err)
