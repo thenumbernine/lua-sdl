@@ -44,6 +44,8 @@ SDLApp.sdlCreateWindowFlags = bit.bor(
 )
 
 function SDLApp:run()
+--DEBUG:print'SDLApp:run begin'
+--DEBUG:print'SDL_Init()...'
 	sdlAssertZero(sdl.SDL_Init(self.sdlInitFlags))
 
 	xpcall(function()
@@ -59,18 +61,23 @@ function SDLApp:run()
 		self:initWindow()
 		self:resize()
 
+--DEBUG:print'starting event loop...'
 		repeat
 			--[[ example A:
 			while sdl.SDL_PollEvent(eventPtr) > 0 do
 			--]]
 			-- [[ example B: is supposed to incur less overhead
+--DEBUG:print'SDL_PumpEvents()...'
 			sdl.SDL_PumpEvents()
+--DEBUG:print('SDL_PeepEvents', eventBuffer.v, #eventBuffer, sdl.SDL_GETEVENT, sdl.SDL_FIRSTEVENT, sdl.SDL_LASTEVENT)
 			local numEvents = sdl.SDL_PeepEvents(eventBuffer.v, #eventBuffer, sdl.SDL_GETEVENT, sdl.SDL_FIRSTEVENT, sdl.SDL_LASTEVENT)
+--DEBUG:print('numEvents =', numEvents)
 			for i=0,numEvents-1 do
 				local eventPtr = eventBuffer.v + i
 			--]]
-
+--DEBUG:print('event.type', eventPtr[0].type)
 				if eventPtr[0].type == sdl.SDL_QUIT then
+--DEBUG:print'calling self:requestExit()'
 					self:requestExit()
 --[[ screen
 				elseif eventPtr[0].type == sdl.SDL_VIDEORESIZE then
@@ -85,28 +92,34 @@ function SDLApp:run()
 						self.width = eventPtr[0].window.data1
 						self.height = eventPtr[0].window.data2
 						self.aspectRatio = self.width / self.height
+--DEBUG:print'calling self:resize()'
 						self:resize()
 					end
 --]]
 				elseif eventPtr[0].type == sdl.SDL_KEYDOWN then
 					if ffi.os == 'Windows' and eventPtr[0].key.keysym.sym == sdl.SDLK_F4 and bit.band(eventPtr[0].key.keysym.mod, sdl.KMOD_ALT) ~= 0 then
+--DEBUG:print'calling self:requestExit()'
 						self:requestExit()
 						break
 					end
 					if ffi.os == 'OSX' and eventPtr[0].key.keysym.sym == sdl.SDLK_q and bit.band(eventPtr[0].key.keysym.mod, sdl.KMOD_GUI) ~= 0 then
+--DEBUG:print'calling self:requestExit()'
 						self:requestExit()
 						break
 					end
 				end
 				if self.event then
+--DEBUG:print'calling self:event()'
 					self:event(eventPtr)
 				end
 			end
 
+--DEBUG:print'calling self:update()'
 			self:update()
 
 			-- separate update call here to ensure it runs last
 			-- yeah this is just for GLApp or anyone else who needs to call some form of swap/flush
+--DEBUG:print'calling self:postUpdate()'
 			self:postUpdate()
 
 		until self.done
@@ -115,7 +128,9 @@ function SDLApp:run()
 		print(debug.traceback())
 	end)
 
+--DEBUG:print'done, calling self:exit()'
 	self:exit()
+--DEBUG:print'SDLApp:run done'
 end
 
 function SDLApp:initWindow()
