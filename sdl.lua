@@ -1,1 +1,1 @@
-return require 'ffi.req' 'sdl'
+return require 'ffi.req' 'sdl2'

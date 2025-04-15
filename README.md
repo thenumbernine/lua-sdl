@@ -2,7 +2,7 @@
 
 [![Donate via Stripe](https://img.shields.io/badge/Donate-Stripe-green.svg)](https://buy.stripe.com/00gbJZ0OdcNs9zi288)<br>
 
-`sdl.lua` is so shorthand `require 'sdl'` will redirect to `require 'ffi.req' 'sdl'`.
+`sdl.lua` is so shorthand `require 'sdl'` will redirect to `require 'ffi.req' 'sdl2'`.
 From there, SDL library search path can be configured and overridden on a per-architecture and per-OS basis.
 See the `ffi/load.lua` section in the [lua ffi bindings](https://github.com/thenumbernine/lua-ffi-bindings) project for more on this.
 
