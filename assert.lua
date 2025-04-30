@@ -1,10 +1,15 @@
 local ffi = require 'ffi'
 local sdl = require 'sdl'
 
+local function sdlGetError()
+	local msgptr = sdl.SDL_GetError()
+	-- prevent ffi.string(NULL) segfaults, here and in gl.get's string() function
+	return msgptr == ffi.null and '(null)' or ffi.string(msgptr)
+end
+
 local function sdlAssert(result)
 	if result then return end
-	local msg = ffi.string(sdl.SDL_GetError())
-	error('SDL_GetError(): '..msg)
+	error('SDL_GetError(): '..sdlGetError())
 end
 
 local function sdlAssertZero(intResult)
@@ -18,6 +23,7 @@ local function sdlAssertNonNull(ptrResult)
 end
 
 return {
+	getError = sdlGetError,
 	assert = sdlAssert,
 	zero = sdlAssertZero,
 	nonnull = sdlAssertNonNull,
