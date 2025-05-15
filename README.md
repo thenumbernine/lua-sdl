@@ -18,7 +18,7 @@ From there, SDL library search path can be configured and overridden on a per-ar
 See the `ffi/load.lua` section in the [lua ffi bindings](https://github.com/thenumbernine/lua-ffi-bindings) project for more on this.
 
 `require 'sdl.app'` will load `app.lua`, which directs to `app3.lua`. 
-This is a Lua application class, for all deriving subclasses ([glapp](https://github.com/thenumbernine/lua-glapp), [imguiapp](https://github.com/thenumbernine/lua-imguiapp), etc).
+This is a Lua application class, for all deriving subclasses ([glapp](https://github.com/thenumbernine/lua-glapp), [imgui.app](https://github.com/thenumbernine/lua-imgui), etc).
 
 # Or if you want to require the library and application files directly:
 
