@@ -17,8 +17,13 @@ local function sdlAssertZero(intResult)
 	return intResult
 end
 
+local function sdlAssertNonZero(intResult)
+	sdlAssert(intResult ~= 0)
+	return intResult
+end
+
 local function sdlAssertNonNull(ptrResult)
-	sdlAssert(ptrResult ~= nil)
+	sdlAssert(ptrResult ~= ffi.null)
 	return ptrResult
 end
 
@@ -26,5 +31,6 @@ return {
 	getError = sdlGetError,
 	assert = sdlAssert,
 	zero = sdlAssertZero,
+	nonzero = sdlAssertNonZero,
 	nonnull = sdlAssertNonNull,
 }

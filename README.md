@@ -2,12 +2,30 @@
 
 [![Donate via Stripe](https://img.shields.io/badge/Donate-Stripe-green.svg)](https://buy.stripe.com/00gbJZ0OdcNs9zi288)<br>
 
-`sdl.lua` is so shorthand `require 'sdl'` will redirect to `require 'ffi.req' 'sdl2'`.
+# Usage
+
+The SDL version can be picked similar to my [gl bindings](http://github.com/thenumbernine/lua-gl)'s `require 'gl.setup' 'version'`:
+`local sdl, SDLApp = require 'sdl.setup' '2'` will set up the subsequent `require 'sdl'` and `require 'sdl.app'`'
+
+This will override the following packages:
+`local sdl = require 'sdl'`
+`local SDLApp = require 'sdl.app'`
+
+# Or if you want to load whatever is the latest fad:
+
+`require 'sdl'` will load the `sdl.lua` file which will redirect to `require 'ffi.req' 'sdl3'`.
 From there, SDL library search path can be configured and overridden on a per-architecture and per-OS basis.
 See the `ffi/load.lua` section in the [lua ffi bindings](https://github.com/thenumbernine/lua-ffi-bindings) project for more on this.
 
-`app.lua` is a application class, for all deriving subclasses ([glapp](https://github.com/thenumbernine/lua-glapp), [imguiapp](https://github.com/thenumbernine/lua-imguiapp), etc).
+`require 'sdl.app'` will load `app.lua`, which directs to `app3.lua`. 
+This is a Lua application class, for all deriving subclasses ([glapp](https://github.com/thenumbernine/lua-glapp), [imguiapp](https://github.com/thenumbernine/lua-imguiapp), etc).
 
--
+# Or if you want to require the library and application files directly:
 
-This is tempt me further to move the 'glapp' stuff into the 'gl/app.lua' folder, and the 'imguiapp' into the 'imgui/app.lua' folder ...
+If you want specifically SDL3 support:
+- use `require 'ffi.req' 'sdl3'` to load the SDL3 library
+- use `require 'sdl.app3'` to load the SDL3 application class.
+
+If you want specifically SDL2 support:
+- use `require 'ffi.req' 'sdl2'` to load the SDL2 library
+- use `require 'sdl.app2'` to load the SDL2 application class.
