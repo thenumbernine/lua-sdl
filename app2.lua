@@ -25,6 +25,15 @@ parameters to override prior to init:
 --]]
 local SDLApp = class()
 
+SDLApp.sdlMajorVersion = 2
+
+-- fun fact
+-- in SDL2, success is 0, and error codes are nonzero *plus* SDL_GetError().
+-- in SDL3, success is 1, fail is 0, and SDL_GetError is the error reason.
+function SDLApp.sdlAssert(...)
+	return sdlAssertZero(...)
+end
+
 function SDLApp:init()
 	self.done = false
 end
@@ -51,7 +60,7 @@ SDLApp.sdlCreateWindowFlags = bit.bor(
 function SDLApp:run()
 --DEBUG(@5):print'SDLApp:run begin'
 --DEBUG(@5):print'SDL_Init()...'
-	sdlAssertZero(sdl.SDL_Init(self.sdlInitFlags))
+	self.sdlAssert(sdl.SDL_Init(self.sdlInitFlags))
 
 	xpcall(function()
 		--[[ example A:
