@@ -104,7 +104,7 @@ function SDLApp:run()
 				elseif eventPtr[0].type == sdl.SDL_EVENT_KEY_DOWN then
 					if ffi.os == 'Windows'
 					and eventPtr[0].key.key == sdl.SDLK_F4
-					and bit.band(eventPtr[0].key.mod, sdl.SDL_KMOD_ALT) ~= 0 
+					and bit.band(eventPtr[0].key.mod, sdl.SDL_KMOD_ALT) ~= 0
 					then
 --DEBUG(@5):print'calling self:requestExit()'
 						self:requestExit()
