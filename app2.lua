@@ -34,6 +34,15 @@ function SDLApp.sdlAssert(...)
 	return sdlAssertZero(...)
 end
 
+-- this seems like such a trivial thing but I have enough demo apps that do it often enough,
+-- and it changed from SDL2 to SDL3
+-- so here it is:
+function SDLApp.sdlGetVersion()
+	local version = ffi.new'SDL_version[1]'
+	sdl.SDL_GetVersion(version)
+	return version[0].major..'.'..version[0].minor..'.'..version[0].patch
+end
+
 function SDLApp:init()
 	self.done = false
 end

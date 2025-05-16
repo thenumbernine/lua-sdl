@@ -28,6 +28,21 @@ function SDLApp.sdlAssert(...)
 	return sdlAssertNonZero(...)
 end
 
+-- this seems like such a trivial thing but I have enough demo apps that do it often enough,
+-- and it changed from SDL2 to SDL3
+-- so here it is:
+function SDLApp.sdlGetVersion()
+	-- I'd put these in ffi/sdl3.lua but I don't want any lua metatable wrappers of ffi.load over it.
+	-- #define SDL_VERSIONNUM_MAJOR(version) ((version) / 1000000)
+	-- #define SDL_VERSIONNUM_MINOR(version) (((version) / 1000) % 1000)
+	-- #define SDL_VERSIONNUM_MICRO(version) ((version) % 1000)
+	local version = sdl.SDL_GetVersion()
+	local micro = version % 1000
+	local minor = math.floor(version / 1000) % 1000
+	local major = math.floor(version / 1000000)
+	return major..'.'..minor..'.'..micro
+end
+
 function SDLApp:init()
 	self.done = false
 end
