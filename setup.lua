@@ -11,7 +11,7 @@ and it'll replace `require 'sdl'` and `require 'sdl.app'` accordingly
 Returns the sdl lib and the sdl app associated with it.
 --]]
 return function(sdlname)
-	sdlname = sdlname or '3'
+	sdlname = sdlname or '2'
 	-- first set up `require 'sdl'`
 	local sdl = require 'ffi.req' ('sdl'..sdlname)
 	package.loaded.sdl = sdl
