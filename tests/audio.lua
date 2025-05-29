@@ -106,12 +106,11 @@ print'here'
 	end
 
 	self.audioDeviceID = sdl.SDL_GetAudioStreamDevice(self.audioStream)
-	sdl.SDL_ResumeAudioDevice(self.audioDeviceID)
 
 	self.lastPlayTime = getTime()
 	self:updateAudio()
 	print'starting audio...'
-	sdl.SDL_PauseAudioDevice(self.audioDeviceID)	-- pause 0 <=> play
+	sdl.SDL_ResumeAudioDevice(self.audioDeviceID)
 end
 
 function App:fillAudioBuffer()
