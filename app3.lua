@@ -1,5 +1,6 @@
 local ffi = require 'ffi'
 local class = require 'ext.class'
+local table = require 'ext.table'
 local sdl = require 'sdl'
 
 local sdlAssertNonZero = require 'sdl.assert'.nonzero
@@ -190,5 +191,24 @@ function SDLApp:exit()
 	sdl.SDL_DestroyWindow(self.window);
 	sdl.SDL_Quit()
 end
+
+-- should I make a separate sdl namespace that separates per-version that isn't SDLApp?
+SDLApp.ctypeForSDLAudioFormat =  {
+	-- TODO 'LSB' vs 'MSB' ...
+	-- TODO how to determine unique types for each of these ...
+	[tonumber(sdl.SDL_AUDIO_U8)] = 'uint8_t',
+	[tonumber(sdl.SDL_AUDIO_S8)] = 'int8_t',
+	[tonumber(sdl.SDL_AUDIO_S16LE)] = 'int16_t',
+	[tonumber(sdl.SDL_AUDIO_S16BE)] = 'int16_t',
+	[tonumber(sdl.SDL_AUDIO_S32LE)] = 'int32_t',
+	[tonumber(sdl.SDL_AUDIO_S32BE)] = 'int32_t',
+	[tonumber(sdl.SDL_AUDIO_F32LE)] = 'float',
+	[tonumber(sdl.SDL_AUDIO_F32BE)] = 'float',
+
+	[tonumber(sdl.SDL_AUDIO_S16)] = 'int16_t',
+	[tonumber(sdl.SDL_AUDIO_S32)] = 'int32_t',
+	[tonumber(sdl.SDL_AUDIO_F32)] = 'float',
+}
+SDLApp.sdlAudioFormatForCType = table.map(SDLApp.ctypeForSDLAudioFormat, function(v,k) return k,v end):setmetatable(nil)
 
 return SDLApp

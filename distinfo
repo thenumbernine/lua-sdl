@@ -5,7 +5,6 @@ files = {
 	["app2.lua"] = "sdl/app2.lua",
 	["app3.lua"] = "sdl/app3.lua",
 	["assert.lua"] = "sdl/assert.lua",
-	["audio.lua"] = "sdl/audio.lua",
 	["sdl-dev-1.rockspec"] = "sdl/sdl-dev-1.rockspec",
 	["sdl.lua"] = "sdl/sdl.lua",
 	["setup.lua"] = "sdl/setup.lua",

@@ -1,5 +1,6 @@
 local ffi = require 'ffi'
 local class = require 'ext.class'
+local table = require 'ext.table'
 
 -- which method to use?  what is the pro vs con of either?
 local sdl = require 'sdl'		-- assume sdl.setup was already called
@@ -189,5 +190,23 @@ function SDLApp:exit()
 	sdl.SDL_DestroyWindow(self.window);
 	sdl.SDL_Quit()
 end
+
+-- should I make a separate sdl namespace that separates per-version that isn't SDLApp?
+SDLApp.ctypeForSDLAudioFormat =  {
+	-- TODO 'LSB' vs 'MSB' ...
+	-- TODO how to determine unique types for each of these ...
+	[sdl.AUDIO_U8] = 'uint8_t',
+	[sdl.AUDIO_S8] = 'int8_t',
+	[sdl.AUDIO_S16] = 'int16_t',
+	[sdl.AUDIO_U16] = 'uint16_t',
+	[sdl.AUDIO_S32] = 'int32_t',
+	[sdl.AUDIO_F32] = 'float',
+
+	[sdl.AUDIO_S16SYS] = 'int16_t',
+	[sdl.AUDIO_U16SYS] = 'uint16_t',
+	[sdl.AUDIO_S32SYS] = 'int32_t',
+	[sdl.AUDIO_F32SYS] = 'float',
+}
+SDLApp.sdlAudioFormatForCType = table.map(SDLApp.ctypeForSDLAudioFormat, function(v,k) return k,v end):setmetatable(nil)
 
 return SDLApp
