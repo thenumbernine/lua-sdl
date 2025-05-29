@@ -4,9 +4,22 @@ local sdl, SDLApp = require 'sdl.setup'(...)
 local App = SDLApp:subclass()
 App.title = 'test'
 
+-- [[ SDL3 bug? If I don't create a GL window then it doesn't make a window at all....
+local gl = require 'gl'
+App.sdlCreateWindowFlags = bit.bor(App.sdlCreateWindowFlags, sdl.SDL_WINDOW_OPENGL)
+function App:postUpdate()
+	sdl.SDL_GL_SwapWindow(self.window)
+end
+--]]
+
 function App:initWindow()
-	App.super.initWindow(self)
 	print('SDL_GetVersion:', self.sdlGetVersion())
+	App.super.initWindow(self)
+-- [[ SDL3 bug? If I don't create a GL window then it doesn't make a window at all....
+	local sdlAssertNonNull = require 'sdl.assert'.nonnull
+	self.sdlCtx = sdlAssertNonNull(sdl.SDL_GL_CreateContext(self.window))
+	sdl.SDL_GL_SetSwapInterval(0)
+--]]
 
 	for _,k in ipairs{
 		--[=[ SDL2 GL attributes:
