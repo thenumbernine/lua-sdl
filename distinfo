@@ -12,7 +12,6 @@ files = {
 	["tests/audio.lua"] = "sdl/tests/audio.lua",
 	["tests/minimal.lua"] = "sdl/tests/minimal.lua",
 
-
 	["ffi/sdl2.lua"] = "sdl/ffi/sdl2.lua",
 	["ffi/sdl3.lua"] = "sdl/ffi/sdl3.lua",
 	["ffi/sdl_image.lua"] = "sdl/ffi/sdl_image.lua",
