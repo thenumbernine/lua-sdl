@@ -13,7 +13,7 @@ Returns the sdl lib and the sdl app associated with it.
 return function(sdlname)
 	sdlname = sdlname or '3'
 	-- first set up `require 'sdl'`
-	local sdl = require 'ffi.req' ('sdl'..sdlname)
+	local sdl = require ('sdl.ffi.sdl'..sdlname)
 	package.loaded.sdl = sdl
 	package.loaded['sdl.sdl'] = sdl
 	-- it is used by sdl.app

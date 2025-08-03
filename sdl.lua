@@ -1,2 +1,2 @@
-return require 'ffi.req' 'sdl3'
---return require 'ffi.req' 'sdl2'
+return require 'sdl.ffi.sdl3'
+--return require 'sdl.ffi.sdl2'
