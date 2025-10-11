@@ -191,22 +191,33 @@ function SDLApp:exit()
 	sdl.SDL_Quit()
 end
 
+local uint8_t = ffi.typeof'uint8_t'
+local int8_t = ffi.typeof'int8_t'
+local int16_t = ffi.typeof'int16_t'
+local int32_t = ffi.typeof'int32_t'
+local float = ffi.typeof'float'
+
 -- should I make a separate sdl namespace that separates per-version that isn't SDLApp?
 SDLApp.ctypeForSDLAudioFormat =  {
 	-- TODO 'LSB' vs 'MSB' ...
 	-- TODO how to determine unique types for each of these ...
-	[sdl.AUDIO_U8] = 'uint8_t',
-	[sdl.AUDIO_S8] = 'int8_t',
-	[sdl.AUDIO_S16] = 'int16_t',
-	[sdl.AUDIO_U16] = 'uint16_t',
-	[sdl.AUDIO_S32] = 'int32_t',
-	[sdl.AUDIO_F32] = 'float',
+	[sdl.AUDIO_U8] = uint8_t,
+	[sdl.AUDIO_S8] = int8_t,
+	[sdl.AUDIO_S16] = int16_t,
+	[sdl.AUDIO_U16] = uint16_t,
+	[sdl.AUDIO_S32] = int32_t,
+	[sdl.AUDIO_F32] = float,
 
-	[sdl.AUDIO_S16SYS] = 'int16_t',
-	[sdl.AUDIO_U16SYS] = 'uint16_t',
-	[sdl.AUDIO_S32SYS] = 'int32_t',
-	[sdl.AUDIO_F32SYS] = 'float',
+	[sdl.AUDIO_S16SYS] = int16_t,
+	[sdl.AUDIO_U16SYS] = uint16_t,
+	[sdl.AUDIO_S32SYS] = int32_t,
+	[sdl.AUDIO_F32SYS] = float,
 }
-SDLApp.sdlAudioFormatForCType = table.map(SDLApp.ctypeForSDLAudioFormat, function(v,k) return k,v end):setmetatable(nil)
+SDLApp.sdlAudioFormatForCType = table.map(
+	SDLApp.ctypeForSDLAudioFormat,
+	function(v,k)
+		return k,tostring(v)
+	end)
+	:setmetatable(nil)
 
 return SDLApp

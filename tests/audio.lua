@@ -6,6 +6,12 @@ local assert = require 'ext.assert'
 local sdl = require 'sdl'
 local SDLApp = require 'sdl.app'
 
+local char_p = ffi.typeof'char*'
+local int16_t = ffi.typeof'int16_t'
+local int_1 = ffi.typeof'int[1]'
+local SDL_AudioSpec = ffi.typeof'SDL_AudioSpec'
+local SDL_AudioSpec_1 = ffi.typeof'SDL_AudioSpec[1]'
+
 local App = SDLApp:subclass()
 App.sdlInitFlags = bit.bor(App.sdlInitFlags, sdl.SDL_INIT_AUDIO)
 
@@ -41,7 +47,7 @@ function App:initWindow()
 
 --[[ crashing
 print'here'
-	local numDevices = ffi.new'int[1]'
+	local numDevices = int_1()
 	local devices = sdl.SDL_GetAudioPlaybackDevices(numDevices)
 	print('num devices:', numDevices[0])
 	print'devices:'
@@ -50,19 +56,19 @@ print'here'
 		local ithName = ffi.string(sdl.SDL_GetAudioDeviceName(i))
 		deviceName = deviceName or ithName
 		print(i, ithName)
-		local spec = ffi.new'SDL_AudioSpec[1]'
-		local sampleFrames = ffi.new'int[1]'
+		local spec = SDL_AudioSpec_1()
+		local sampleFrames = int_1()
 		self.sdlAssert(sdl.SDL_GetAudioDeviceSpec(i, spec, sampleFrames))
 		--printSpecs(spec[0])	-- this just has channels filled out
 	end
 print'here'
 --]]
 
-	local desired = ffi.new'SDL_AudioSpec[1]'
+	local desired = SDL_AudioSpec_1()
 	if fn then
 		self.wav = require 'audio.io.wav'():load(fn)
 		desired[0].freq = self.wav.freq
-		desired[0].format = sdlAudioFormatForCType[self.wav.ctype]
+		desired[0].format = sdlAudioFormatForCType[tostring(self.wav.ctype)]
 		desired[0].channels = self.wav.channels
 		desired[0].samples = self.wav.size / (self.wav.channels * ffi.sizeof(self.wav.ctype))
 		desired[0].size = self.wav.size
@@ -74,11 +80,11 @@ print'here'
 		self.channelCount = 2
 		self.bufferSizeInSampleFrames = bufferSizeInSeconds * self.sampleFrameRate
 		local bufferSizeInSamples = self.bufferSizeInSampleFrames * self.channelCount
-		self.sampleType = 'int16_t'
+		self.sampleType = int16_t
 		self.bufferSizeInBytes = bufferSizeInSamples * ffi.sizeof(self.sampleType)
-		ffi.fill(desired, ffi.sizeof'SDL_AudioSpec')
+		ffi.fill(desired, ffi.sizeof(SDL_AudioSpec))
 		desired[0].freq = self.sampleFrameRate
-		desired[0].format = sdlAudioFormatForCType[self.sampleType]
+		desired[0].format = sdlAudioFormatForCType[tostring(self.sampleType)]
 		desired[0].channels = self.channelCount
 		-- removed in sdl3 ... uhhh ... how big is the buffer?
 		--desired[0].samples = self.bufferSizeInSampleFrames -- in "sample frames" ... where stereo means two samples per "sample frame"
@@ -99,7 +105,8 @@ print'here'
 	self.audioBufferLength = math.ceil(self.bufferSizeInBytes / ffi.sizeof(self.sampleType))
 	self.sampleIndex = 0
 	if not fn then
-		self.audioBuffer = ffi.new(self.sampleType..'[?]', self.audioBufferLength)
+		local sampleTypeArr = ffi.typeof('$[?]', self.sampleType)
+		self.audioBuffer = sampleTypeArr(self.audioBufferLength)
 		self:fillAudioBuffer()
 	else
 		self.audioBuffer = self.wav.data
@@ -125,8 +132,8 @@ function App:fillAudioBuffer()
 		self.sampleIndex = self.sampleIndex + 1
 	end
 	assert.eq(
-		ffi.cast('char*', p),
-		ffi.cast('char*', self.audioBuffer) + self.bufferSizeInBytes
+		ffi.cast(char_p, p),
+		ffi.cast(char_p, self.audioBuffer) + self.bufferSizeInBytes
 	)
 end
 
@@ -169,7 +176,12 @@ end
 
 function App:exit()
 	sdl.SDL_CloseAudioDevice(self.audioDeviceID)
+	--[[ if sdl2
 	sdl.SDL_AudioQuit()
+	--]]
+	-- [[ if sdl3
+	sdl.SDL_QuitSubSystem(sdl.SDL_INIT_AUDIO)
+	--]]
 
 	App.super.exit(self)
 end
