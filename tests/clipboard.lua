@@ -25,6 +25,24 @@ print('done reading mimeTypes')
 	sdl.SDL_free(mimeTypesCstr)
 --]]
 
+
+-- [[ test clipboard text functionality
+	local s = 'testing testing '..math.random(0,0xffffffff)
+print('setting clipboard text to:', s)
+	print('SDL_SetClipboardText', sdl.SDL_SetClipboardText(s))
+	local result = sdl.SDL_HasClipboardText()
+print('SDL_HasClipboardText', result)
+print('SDL_HasClipboardData("text/plain")', sdl.SDL_HasClipboardData('text/plain'))
+	if result then
+		local text = sdl.SDL_GetClipboardText()
+		if text == ffi.null then
+print('SDL_GetClipboardText had null clipboard')
+		else
+print('SDL_GetClipboardText had:', ffi.string(text))
+		end
+	end
+--]]
+
 	-- then quit
 	self:requestExit()
 end
