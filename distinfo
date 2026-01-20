@@ -24,6 +24,7 @@ deps = {
 	"ffi",
 }
 
+
 generateBindings = {
 	-- TODO STILL
 	-- looks like atm i'm using a hand-rolled sdl anyways
@@ -75,6 +76,7 @@ also HDF5 has a lot of unused enums ...
 		skipincs = (ffi.os == 'Windows' or ffi.os == 'OSX') and {'<immintrin.h>'} or {},
 		silentincs = (ffi.os == 'Windows' or ffi.os == 'OSX') and {} or {'<immintrin.h>'},
 		final = function(code)
+			local commentOutLine = require 'include.util'.commentOutLine
 			code = commentOutLine(code, 'enum { SDL_begin_code_h = 1 };')
 
 			-- TODO comment out SDL2/SDL_config.h ... or just put it in silentincs ?
@@ -100,27 +102,36 @@ return require 'ffi.load' 'SDL2'
 		inc = '<SDL3/SDL.h>',
 		out = 'sdl3.lua',
 		pkgconfig = 'sdl3',
-		includedirs = ffi.os == 'Windows' and {os.home()..'/SDL2'} or nil,
-		skipincs = (ffi.os == 'Windows' or ffi.os == 'OSX') and {'<immintrin.h>'} or {},
-		silentincs = (ffi.os == 'Windows' or ffi.os == 'OSX') and {} or {'<immintrin.h>'},
-		final = function(code)
-			code = commentOutLine(code, 'enum { SDL_begin_code_h = 1 };')
+		includedirs = ffi.os == 'Windows' and {os.home()..'/SDL3'} or nil,
+		skipincs = '<immintrin.h>',
+		-- TODO this better ... based on include-path-wildcard or something
+		macroincs = table.wrapfor(path'/usr/include/SDL3':dir()):mapi(function(f)
+			return '<SDL3/'..f[1]..'>'
+		end),
+		final = function(code, preproc)
+			local safegsub = require 'include.util'.safegsub
+			code = safegsub(code, '__restrict', '')
+			code = safegsub(code, '__extension__', '')
+			code = safegsub(code, '__asm__%s*%b()', '')
+			code = safegsub(code, '_Static_assert%b()%s*;', '')
+			code = safegsub(code, '__attribute__%s*%b()', '')
+			code = safegsub(code, 'static%s_*inline_*%s[^(]-%s[^(]-%s*%(.-%)%s*%b{}', '')
 
-			-- TODO comment out SDL3/SDL_config.h ... or just put it in silentincs ?
-			-- same with float.h
-
-			-- TODO evaluate this and insert it correctly?
-			code = code .. [=[
-ffi.cdef[[
-// these aren't being generated correctly so here they are:
-enum { SDL_WINDOWPOS_UNDEFINED = 0x1FFF0000u };
-enum { SDL_WINDOWPOS_CENTERED = 0x2FFF0000u };
-]]
-]=]
-
+			-- [=[ old way
 			code = code .. [[
 return require 'ffi.load' 'SDL3'
 ]]
+			--]=]
+			--[=[ new way
+			-- TODO makeLibWrapper that doesn't really wrap lib, just organizes header
+			local makeLibWrapper = require 'include.util'.makeLibWrapper
+			code = makeLibWrapper{
+				code = code,
+				preproc = preproc,
+				lib = 'SDL3',
+			}
+			--]=]
+			code = code:gsub('%(void%)', '()')
 			return code
 		end,
 	},

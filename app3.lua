@@ -66,20 +66,21 @@ SDLApp.sdlCreateWindowFlags = bit.bor(
 	sdl.SDL_WINDOW_RESIZABLE
 )
 
+--[[ example A:
+local eventPtr = ffi.new('SDL_Event[1]')
+--]]
+-- [[ example B
+local vector = require 'ffi.cpp.vector'
+local eventBuffer = vector'SDL_Event'()
+eventBuffer:resize(256)
+---]]
+
 function SDLApp:run()
 --DEBUG(@5):print'SDLApp:run begin'
 --DEBUG(@5):print'SDL_Init()...'
 	self.sdlAssert(sdl.SDL_Init(self.sdlInitFlags))
 
 	xpcall(function()
-		--[[ example A:
-		local eventPtr = ffi.new('SDL_Event[1]')
-		--]]
-		-- [[ example B:
-		local vector = require 'ffi.cpp.vector'
-		local eventBuffer = vector'SDL_Event'()
-		eventBuffer:resize(256)
-		--]]
 
 		self:initWindow()
 		self:resize()
@@ -87,7 +88,7 @@ function SDLApp:run()
 --DEBUG(@5):print'starting event loop...'
 		repeat
 			--[[ example A:
-			while sdl.SDL_PollEvent(eventPtr) > 0 do
+			while sdl.SDL_PollEvent(eventPtr) do
 			--]]
 			-- [[ example B: is supposed to incur less overhead
 --DEBUG(@5):print'SDL_PumpEvents()...'
@@ -96,39 +97,39 @@ function SDLApp:run()
 			local numEvents = sdl.SDL_PeepEvents(eventBuffer.v, #eventBuffer, sdl.SDL_GETEVENT, sdl.SDL_EVENT_FIRST, sdl.SDL_EVENT_LAST)
 --DEBUG(@5):print('numEvents =', numEvents)
 			for i=0,numEvents-1 do
-				local eventPtr = eventBuffer.v + i
+				local event = eventBuffer.v + i
 			--]]
---DEBUG(@5):print('event.type', eventPtr[0].type)
-				if eventPtr[0].type == sdl.SDL_EVENT_QUIT then
---DEBUG(@5):print'calling self:requestExit()'
+---DEBUG(@5):print('event.type', eventPtr[0].type)
+				if event.type == sdl.SDL_EVENT_QUIT then
+---DEBUG(@5):print'calling self:requestExit()'
 					self:requestExit()
 --[[ screen
-				elseif eventPtr[0].type == sdl.SDL_VIDEORESIZE then
-					self.width = eventPtr[0].resize.w
-					self.height = eventPtr[0].resize.h
+				elseif event.type == sdl.SDL_VIDEORESIZE then
+					self.width = event.resize.w
+					self.height = event.resize.h
 					self.aspectRatio = self.width / self.height
 					self:resize()
 --]]
 -- [[ window
-				elseif eventPtr[0].type == sdl.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED then
-					self.width = eventPtr[0].window.data1
-					self.height = eventPtr[0].window.data2
+				elseif event.type == sdl.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED then
+					self.width = event.window.data1
+					self.height = event.window.data2
 					self.aspectRatio = self.width / self.height
 --DEBUG(@5):print'calling self:resize()'
 					self:resize()
 --]]
-				elseif eventPtr[0].type == sdl.SDL_EVENT_KEY_DOWN then
+				elseif event.type == sdl.SDL_EVENT_KEY_DOWN then
 					if ffi.os == 'Windows'
-					and eventPtr[0].key.key == sdl.SDLK_F4
-					and bit.band(eventPtr[0].key.mod, sdl.SDL_KMOD_ALT) ~= 0
+					and event.key.key == sdl.SDLK_F4
+					and bit.band(event.key.mod, sdl.SDL_KMOD_ALT) ~= 0
 					then
 --DEBUG(@5):print'calling self:requestExit()'
 						self:requestExit()
 						break
 					end
 					if ffi.os == 'OSX'
-					and eventPtr[0].key.key == sdl.SDLK_Q
-					and bit.band(eventPtr[0].key.mod, sdl.SDL_KMOD_GUI) ~= 0
+					and event.key.key == sdl.SDLK_Q
+					and bit.band(event.key.mod, sdl.SDL_KMOD_GUI) ~= 0
 					then
 --DEBUG(@5):print'calling self:requestExit()'
 						self:requestExit()
@@ -137,7 +138,7 @@ function SDLApp:run()
 				end
 				if self.event then
 --DEBUG(@5):print'calling self:event()'
-					self:event(eventPtr)
+					self:event(event)
 				end
 			end
 
