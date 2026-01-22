@@ -685,13 +685,13 @@ local ffi = require 'ffi'
 
 if ffi.os == 'OSX' then
 	require 'ffi.req' 'c.Availability'
-	require 'ffi.req' 'c.stdarg'
-	require 'ffi.req' 'c.stdint'
-	require 'ffi.req' 'c.string'
-	require 'ffi.req' 'c.wchar'
-	require 'ffi.req' 'c.inttypes'
-	require 'ffi.req' 'c.stdbool'
 end
+require 'ffi.req' 'c.stdarg'
+require 'ffi.req' 'c.stdint'
+require 'ffi.req' 'c.string'
+require 'ffi.req' 'c.wchar'
+require 'ffi.req' 'c.inttypes'
+require 'ffi.req' 'c.stdbool'
 
 ffi.cdef[[
 typedef int8_t Sint8;
