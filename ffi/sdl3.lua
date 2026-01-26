@@ -690,7 +690,7 @@ require 'ffi.req' 'c.stdarg'
 require 'ffi.req' 'c.stdint'
 require 'ffi.req' 'c.string'
 require 'ffi.req' 'c.wchar'
-require 'ffi.req' 'c.inttypes'
+if ffi.os ~= 'Windows' then require 'ffi.req' 'c.inttypes' end
 require 'ffi.req' 'c.stdbool'
 
 ffi.cdef[[
