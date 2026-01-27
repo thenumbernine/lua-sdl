@@ -25,7 +25,7 @@ deps = {
 }
 
 
-generateBindings = {
+generateBindings = function()return{
 	-- TODO STILL
 	-- looks like atm i'm using a hand-rolled sdl anyways
 	--[[
@@ -135,4 +135,4 @@ return require 'ffi.load' 'SDL3'
 			return code
 		end,
 	},
-}
+}end
