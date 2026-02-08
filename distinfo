@@ -45,6 +45,7 @@ deps = {
 	"audio",
 	"ext",
 	"ffi",
+	"stl",
 }
 
 

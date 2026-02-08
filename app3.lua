@@ -70,7 +70,7 @@ SDLApp.sdlCreateWindowFlags = bit.bor(
 local eventPtr = ffi.new('SDL_Event[1]')
 --]]
 -- [[ example B
-local vector = require 'ffi.cpp.vector'
+local vector = require 'stl.vector'
 local eventBuffer = vector'SDL_Event'()
 eventBuffer:resize(256)
 ---]]
