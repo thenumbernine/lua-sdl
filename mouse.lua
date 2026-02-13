@@ -1,8 +1,3 @@
---[[
-I went and tied mouse closely with gui, then tried to separate gui from tactics ...
-this might end up in openglapp ...
---]]
-
 local ffi = require 'ffi'
 local table = require 'ext.table'
 local class = require 'ext.class'
