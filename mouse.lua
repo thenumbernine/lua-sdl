@@ -66,6 +66,20 @@ function Mouse:init(args)
 	self.activeFingersInOrder = table()
 end
 
+function Mouse.apply(cl)
+	cl = class(cl)
+	function cl:init(args, ...)
+		cl.super.init(self, ...)
+		self.mouse = self.mouse or Mouse{app=self}
+	end
+	function cl:update(...)
+		self.mouse:update()
+		return cl.super.update(self, ...)
+	end
+	cl.mouseApplied = true
+	return cl
+end
+
 -- process this-frame vs last-frame state-changes
 function Mouse:update()
 	local app = self.app
