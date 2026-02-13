@@ -48,6 +48,7 @@ deps = {
 	"ext",
 	"ffi",
 	"stl",
+	"vec-ffi",
 }
 
 
