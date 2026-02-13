@@ -140,7 +140,7 @@ function Mouse:update()
 	self.lastPos.x = self.pos.x
 	self.lastPos.y = self.pos.y
 	self.pos.x = tonumber(self.newPixelPos.x) / tonumber(app.width)
-	self.pos.y = tonumber(self.newPixelPos.y) / tonumber(app.height)
+	self.pos.y = 1 - tonumber(self.newPixelPos.y) / tonumber(app.height)
 	self.deltaPos.x = self.pos.x - self.lastPos.x
 	self.deltaPos.y = self.pos.y - self.lastPos.y
 
