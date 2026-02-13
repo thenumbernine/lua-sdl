@@ -14,6 +14,7 @@ files = {
 	"ffi/sdl3.lua",
 	"ffi/sdl_image.lua",
 	"ffi/sdl_mixer.lua",
+	"mouse.lua",
 	"sdl-dev-1.rockspec",
 	"sdl.lua",
 	"setup.lua",
