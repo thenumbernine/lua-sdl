@@ -21,6 +21,7 @@ files = {
 	"tests/app.lua",
 	"tests/audio.lua",
 	"tests/clipboard.lua",
+	"tests/events.lua",
 	"tests/minimal.lua",
 }
 if ffi.os == "Linux" and ffi.arch == "x64" then
