@@ -76,6 +76,10 @@ function Mouse.apply(cl)
 		self.mouse:update()
 		return cl.super.update(self, ...)
 	end
+	function cl:event(...)
+		self.mouse:event(...)
+		return cl.super.event(self, ...)
+	end
 	cl.mouseApplied = true
 	return cl
 end
@@ -158,6 +162,7 @@ function Mouse:update()
 	self.rightDragging = false
 
 	do	-- TODO used to not happen if the gui got input
+--print('leftDown', self.leftDown)
 		if self.leftDown then
 			if not self.lastLeftDown then
 				self.leftPress = true
@@ -208,6 +213,8 @@ function Mouse:update()
 end
 
 function Mouse:event(e)
+	if self.cantHandleEvent then return end
+
 	if e.type == mouseButtonUpType
 	or e.type == mouseButtonDownType
 	then
