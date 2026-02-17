@@ -109,6 +109,7 @@ function Mouse:update()
 			-- tell our mouse event handler to ignore events coming from touches
 			self.doingMultiTouchGesture = true
 		else
+			self.lastMultiTouchDistSq = nil
 			self.multiTouchDistSq = nil
 		end
 
@@ -241,9 +242,9 @@ function Mouse:event(e)
 			id = fingerID,
 			pos = vec4f(
 				e.tfinger.x,
-				e.tfinger.y,
+				1 - e.tfinger.y,
 				e.tfinger.dx,
-				e.tfinger.dy
+				-e.tfinger.dy
 			),
 		}
 		self.gotFingerEvent = true
@@ -265,15 +266,15 @@ function Mouse:event(e)
 				id = fingerID,
 				pos = vec4f(
 					e.tfinger.x,
-					e.tfinger.y,
+					1 - e.tfinger.y,
 					e.tfinger.dx,
-					e.tfinger.dy
+					-e.tfinger.dy
 				),
 			}
 --DEBUG:print('motion setting finger', fingerID, 'to', self.activeFingers[fingerID].pos)
 		else
 			finger.pos.x, finger.pos.y, finger.pos.z, finger.pos.w
-			= e.tfinger.x, e.tfinger.y, e.tfinger.dx, e.tfinger.dy
+			= e.tfinger.x, 1 - e.tfinger.y, e.tfinger.dx, -e.tfinger.dy
 --DEBUG:print('updating finger', fingerID, 'to', finger.pos)
 		end
 		-- what about finger events that dont get a down event?
