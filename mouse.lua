@@ -94,6 +94,13 @@ function Mouse:update()
 		for fingerID, finger in pairs(self.activeFingers) do
 			numTouches=numTouches+1
 			self.activeFingersInOrder[numTouches] = finger
+			-- I am storing finger dx dy in pos z w
+			-- but this will show the finger x y state change per frame,
+			-- which is more useful
+			finger.delta.x, finger.delta.y
+			, finger.newDelta.x, finger.newDelta.y
+			= finger.newDelta.x, finger.newDelta.y
+			, 0, 0
 		end
 		for j=numTouches+1,prevNumTouches do
 			self.activeFingersInOrder[j] = nil
@@ -221,6 +228,7 @@ function Mouse:event(e)
 		elseif e.button.button == sdl.SDL_BUTTON_RIGHT then
 			self.newRightDown = down
 		end
+--DEBUG:print(down and 'mouseDown' or 'mouseUp')
 	elseif e.type == mouseMotionEventType then
 		-- if it's a mouse event
 		-- and it came from a touch event
@@ -233,6 +241,7 @@ function Mouse:event(e)
 			self.newPixelPos.x = e.motion.x
 			self.newPixelPos.y = e.motion.y
 		end
+--DEBUG:print('mouseMotion', self.newPixelPos)
 	elseif e.type == mouseWheelEventType then
 		self.newWheelDelta.x = self.newWheelDelta.x + e.wheel.x
 		self.newWheelDelta.y = self.newWheelDelta.y + e.wheel.y
@@ -246,12 +255,14 @@ function Mouse:event(e)
 				e.tfinger.dx,
 				-e.tfinger.dy
 			),
+			delta = vec2f(),
+			newDelta = vec2f(),
 		}
 		self.gotFingerEvent = true
---DEBUG:print('setting finger', fingerID, 'to', self.activeFingers[fingerID].pos)
+--DEBUG:print('fingerDown', fingerID, 'to', self.activeFingers[fingerID].pos)
 	elseif e.type == fingerUpEventType then
 		local fingerID = tonumber(e.tfinger.fingerID)
---DEBUG:print('clearing finger', fingerID)
+--DEBUG:print('fingerUp', fingerID)
 		self.activeFingers[fingerID] = nil
 		self.gotFingerEvent = true
 	elseif e.type == fingerMotionEventType then
@@ -270,12 +281,17 @@ function Mouse:event(e)
 					e.tfinger.dx,
 					-e.tfinger.dy
 				),
+				delta = vec2f(),
+				newDelta = vec2f(),
 			}
---DEBUG:print('motion setting finger', fingerID, 'to', self.activeFingers[fingerID].pos)
+--DEBUG:print('fingerMotion new', fingerID, 'to', self.activeFingers[fingerID].pos)
 		else
+			local oldX, oldY = finger.pos.x, finger.pos.y
 			finger.pos.x, finger.pos.y, finger.pos.z, finger.pos.w
 			= e.tfinger.x, 1 - e.tfinger.y, e.tfinger.dx, -e.tfinger.dy
---DEBUG:print('updating finger', fingerID, 'to', finger.pos)
+			finger.newDelta.x = finger.newDelta.x + (finger.pos.x - oldX)
+			finger.newDelta.y = finger.newDelta.y + (finger.pos.y - oldY)
+--DEBUG:print('fingerMotion update', fingerID, 'to', finger.pos)
 		end
 		-- what about finger events that dont get a down event?
 		-- should I track time on fingers and clear them periodically?
