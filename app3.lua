@@ -70,9 +70,14 @@ SDLApp.sdlCreateWindowFlags = bit.bor(
 local eventPtr = ffi.new('SDL_Event[1]')
 --]]
 -- [[ example B
+--[=[ works but right now stl/vector.lua creates a nameless type which my web impl luaffifb doesn't support
 local vector = require 'stl.vector'
-local eventBuffer = vector'SDL_Event'()
-eventBuffer:resize(256)
+local eventBuffer = vector'SDL_Event'(256)
+--]=]
+-- [=[ so we'll try this
+local vector = require 'stl.vector-lua'
+local eventBuffer = vector('SDL_Event', 256)
+--]=]
 ---]]
 
 function SDLApp:run()
