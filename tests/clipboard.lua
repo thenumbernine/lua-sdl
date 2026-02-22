@@ -35,7 +35,7 @@ print('SDL_HasClipboardText', result)
 print('SDL_HasClipboardData("text/plain")', sdl.SDL_HasClipboardData('text/plain'))
 	if result then
 		local text = sdl.SDL_GetClipboardText()
-		if text == ffi.null then
+		if text == nil then
 print('SDL_GetClipboardText had null clipboard')
 		else
 print('SDL_GetClipboardText had:', ffi.string(text))

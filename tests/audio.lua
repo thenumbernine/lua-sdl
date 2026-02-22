@@ -93,7 +93,7 @@ print'here'
 
 	self.audioStream = sdl.SDL_OpenAudioDeviceStream(sdl.SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, desired, nil, nil)
 	self.audioSpec = desired -- uhh what happened to desired vs actual?
-	assert.ne(self.audioStream, ffi.null, "SDL_OpenAudioDeviceStream failed")
+	assert.ne(self.audioStream, nil, "SDL_OpenAudioDeviceStream failed")
 
 	-- recalculate based on what we're given
 	self.sampleFrameRate = self.audioSpec[0].freq

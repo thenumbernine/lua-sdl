@@ -4,7 +4,7 @@ local sdl = require 'sdl'
 local function sdlGetError()
 	local msgptr = sdl.SDL_GetError()
 	-- prevent ffi.string(NULL) segfaults, here and in gl.get's string() function
-	return msgptr == ffi.null and '(null)' or ffi.string(msgptr)
+	return msgptr == nil and '(null)' or ffi.string(msgptr)
 end
 
 local function sdlAssert(result)
@@ -23,7 +23,7 @@ local function sdlAssertNonZero(intResult)
 end
 
 local function sdlAssertNonNull(ptrResult)
-	sdlAssert(ptrResult ~= ffi.null)
+	sdlAssert(ptrResult ~= nil)
 	return ptrResult
 end
 
