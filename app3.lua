@@ -167,16 +167,35 @@ function SDLApp:run()
 end
 
 function SDLApp:initWindow()
---[[ screen
-		local screenFlags = bit.bor(sdl.SDL_DOUBLEBUF, sdl.SDL_RESIZABLE)
-		local screen = sdl.SDL_SetVideoMode(self.width, self.height, 0, screenFlags)
+--[[ screen (proly SDL2 version)
+	local screenFlags = bit.bor(sdl.SDL_DOUBLEBUF, sdl.SDL_RESIZABLE)
+	local screen = sdl.SDL_SetVideoMode(self.width, self.height, 0, screenFlags)
 --]]
--- [[ window
-		self.window = sdlAssertNonNull(sdl.SDL_CreateWindow(
-			self.title,
-			self.width,
-			self.height,
-			self.sdlCreateWindowFlags))
+-- [[ window.  works in desktop GL.  fails in emscripten WebGL. works with desktop WebGPU Dawn.
+	self.window = sdlAssertNonNull(sdl.SDL_CreateWindow(
+		self.title,
+		self.width,
+		self.height,
+		self.sdlCreateWindowFlags))
+--DEBUG:print('SDL3App self.window', self.window)
+--]]
+--[[ window+renderer.  console-errors in desktop GL.  works in emscripten WebGL.  errors in desktop Vulkan. works with desktop WebGPU Dawn.
+	self.windowPtr = ffi.new'SDL_Window*[1]'
+	self.rendererPtr = ffi.new'SDL_Renderer*[1]'
+print('sdlCreateWindowFlags', self.sdlCreateWindowFlags)
+	self.sdlAssert(sdl.SDL_CreateWindowAndRenderer(
+		self.title,
+		self.width,
+		self.height,
+		self.sdlCreateWindowFlags,
+		self.windowPtr,
+		self.rendererPtr))
+	self.window = self.windowPtr[0]
+	self.renderer = self.rendererPtr[0]
+	self.windowPtr = nil
+	self.rendererPtr = nil
+--DEBUG:print('SDL3App self.window', self.window)
+--DEBUG:print('SDL3App self.renderer', self.renderer)
 --]]
 end
 
