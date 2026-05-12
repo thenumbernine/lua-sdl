@@ -26,18 +26,18 @@ files = {
 	"tests/events.lua",
 	"tests/minimal.lua",
 }
-if ffi.os == "Linux" and ffi.arch == "x64" then
+if targetOS == "Linux" and targetArch == "x64" then
 	table.append(files, {
 		"bin/Linux/x64/libSDL2.so",
 		"bin/Linux/x64/libSDL3.so",
 	})
 end
-if ffi.os == "OSX" and ffi.arch == "x64" then
+if targetOS == "OSX" and targetArch == "x64" then
 	table.append(files, {
 		"bin/OSX/x64/libSDL2.dylib",
 	})
 end
-if ffi.os == "Windows" and ffi.arch == "x64" then
+if targetOS == "Windows" and targetArch == "x64" then
 	table.append(files, {
 		"bin/Windows/x64/SDL2.dll",
 		"bin/Windows/x64/SDL3.dll",
