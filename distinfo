@@ -3,6 +3,8 @@
 --------------------------------------------
 
 name = "sdl"
+git = "https://github.com/thenumbernine/lua-sdl"
+
 files = {
 	"README.md",
 	"app.lua",
@@ -47,6 +49,7 @@ deps = {
 	"audio",
 	"ext",
 	"ffi",
+	--"gl",	-- used by tests/
 	"stl",
 	"vec-ffi",
 }
